@@ -1,5 +1,6 @@
 let accounts = JSON.parse(localStorage.getItem('bankAccounts')) || [];
 
+// Create new account
 function createAccount() {
     const accountNumber = Math.floor(100000 + Math.random() * 900000);
     const name = prompt("Enter account holder's name:");
@@ -13,97 +14,108 @@ function createAccount() {
             transactions: []
         });
         updateLocalStorage();
-        showResult(`
-            <div class="success">
-                <h3>🎉 Account Created!</h3>
-                <p>Account Number: <strong>${accountNumber}</strong></p>
-                <p>Account Holder: <strong>${name}</strong></p>
-                <p>Initial Balance: <strong>$${initialBalance.toFixed(2)}</strong></p>
-            </div>
-        `);
+        showResult(`Account created!<br>Account Number: ${accountNumber}`);
     } else {
-        showResult(`
-            <div class="error">
-                <h3>❌ Creation Failed</h3>
-                <p>Invalid input values provided</p>
-            </div>
-        `);
+        showError('Invalid input! Account not created.');
     }
 }
 
-// ... (keep the previous findAccount, deposit, withdraw functions)
+// Deposit money
+function deposit() {
+    const accountNumber = getInputNumber('accountNumber');
+    const amount = getInputNumber('amount');
+    const account = findAccount(accountNumber);
 
+    if (!account || !amount) return;
+
+    account.balance += amount;
+    account.transactions.push({
+        type: 'deposit',
+        amount: amount,
+        date: new Date().toLocaleString()
+    });
+    updateLocalStorage();
+    showResult(`Deposited $${amount}. New balance: $${account.balance}`);
+}
+
+// Withdraw money
+function withdraw() {
+    const accountNumber = getInputNumber('accountNumber');
+    const amount = getInputNumber('amount');
+    const account = findAccount(accountNumber);
+
+    if (!account || !amount) return;
+    
+    if (account.balance >= amount) {
+        account.balance -= amount;
+        account.transactions.push({
+            type: 'withdrawal',
+            amount: amount,
+            date: new Date().toLocaleString()
+        });
+        updateLocalStorage();
+        showResult(`Withdrew $${amount}. New balance: $${account.balance}`);
+    } else {
+        showError('Insufficient funds!');
+    }
+}
+
+// Check balance
 function checkBalance() {
-    const accountNumber = parseInt(document.getElementById('accountNumber').value);
+    const accountNumber = getInputNumber('accountNumber');
     const account = findAccount(accountNumber);
-
+    
     if (account) {
-        showResult(`
-            <div class="success">
-                <h3>💰 Account Balance</h3>
-                <p>Holder: <strong>${account.name}</strong></p>
-                <p>Balance: <strong>$${account.balance.toFixed(2)}</strong></p>
-            </div>
-        `);
+        showResult(`Balance for ${account.name}: $${account.balance}`);
     } else {
         showError('Account not found!');
     }
 }
 
+// View transactions
 function viewTransactions() {
-    const accountNumber = parseInt(document.getElementById('accountNumber').value);
+    const accountNumber = getInputNumber('accountNumber');
     const account = findAccount(accountNumber);
-    const history = document.getElementById('transactionHistory');
-
+    
     if (account) {
-        let transactionsHTML = '<h3>📜 Transaction History</h3>';
-        if (account.transactions.length === 0) {
-            transactionsHTML += '<p>No transactions yet</p>';
-        } else {
-            transactionsHTML += account.transactions.map(trans => `
-                <div class="transaction-item ${trans.includes('+') ? 'deposit' : 'withdrawal'}">
-                    <span>${new Date().toLocaleString()}</span>
-                    <strong>${trans}</strong>
-                </div>
-            `).join('');
-        }
-        history.innerHTML = transactionsHTML;
+        const transactionsHTML = account.transactions.map(trans => `
+            <div class="transaction">
+                <span>${trans.date}</span>
+                <strong>${trans.type}: $${trans.amount}</strong>
+            </div>
+        `).join('');
+        
+        showResult(`Transaction history for ${account.name}:${transactionsHTML}`);
     } else {
         showError('Account not found!');
     }
 }
 
-function showResult(html) {
-    const resultDiv = document.getElementById('result');
-    resultDiv.innerHTML = html;
-    resultDiv.scrollIntoView({ behavior: 'smooth' });
+// Helper functions
+function findAccount(accountNumber) {
+    const account = accounts.find(acc => acc.accountNumber === accountNumber);
+    if (!account) showError('Account not found!');
+    return account;
 }
 
-function showError(message) {
-    showResult(`
-        <div class="error">
-            <h3>⚠️ Error</h3>
-            <p>${message}</p>
-        </div>
-    `);
+function getInputNumber(elementId) {
+    const value = parseFloat(document.getElementById(elementId).value);
+    if (isNaN(value)) showError('Please enter valid numbers!');
+    return value;
 }
 
 function updateLocalStorage() {
     localStorage.setItem('bankAccounts', JSON.stringify(accounts));
 }
 
-// Initialize account info display
-document.getElementById('accountNumber').addEventListener('input', function(e) {
-    const account = findAccount(parseInt(e.target.value));
-    const infoDiv = document.getElementById('accountInfo');
-    
-    if (account) {
-        infoDiv.innerHTML = `
-            <div class="success">
-                Account Holder: <strong>${account.name}</strong>
-            </div>
-        `;
-    } else {
-        infoDiv.innerHTML = '';
-    }
-});
+function showResult(message) {
+    document.getElementById('result').innerHTML = `
+        <div class="success">${message}</div>
+    `;
+}
+
+function showError(message) {
+    document.getElementById('result').innerHTML = `
+        <div class="error">${message}</div>
+    `;
+}
