@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeoBank - Account Management</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="logo">NeoBank</h1>
+            <div class="account-info" id="accountInfo"></div>
+        </header>
+
+        <main class="dashboard">
+            <section class="card create-account">
+                <h2>Create New Account</h2>
+                <button class="btn-primary" onclick="createAccount()">
+                    <span>+</span> Open Account
+                </button>
+            </section>
+
+            <section class="card transaction-section">
+                <h2>Transactions</h2>
+                <div class="form-group">
+                    <input type="number" id="accountNumber" placeholder=" " class="input-field">
+                    <label for="accountNumber">Account Number</label>
+                </div>
+                <div class="form-group">
+                    <input type="number" id="amount" placeholder=" " class="input-field">
+                    <label for="amount">Amount ($)</label>
+                </div>
+                
+                <div class="button-grid">
+                    <button class="btn-success" onclick="deposit()">
+                        <span>↑</span> Deposit
+                    </button>
+                    <button class="btn-danger" onclick="withdraw()">
+                        <span>↓</span> Withdraw
+                    </button>
+                    <button class="btn-info" onclick="checkBalance()">
+                        <span>$</span> Balance
+                    </button>
+                    <button class="btn-secondary" onclick="viewTransactions()">
+                        <span>≡</span> History
+                    </button>
+                </div>
+            </section>
+
+            <section class="card result-card">
+                <div id="result"></div>
+                <div id="transactionHistory"></div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
